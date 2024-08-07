@@ -1,0 +1,36 @@
+services:
+  # python-app:
+  #   build:
+  #     context: ./python-llm-model
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "5000:5000"
+  #   volumes:
+  #     - ./python-llm-model:/app
+  #   depends_on:
+  #     - db
+
+  node-server:
+    build:
+      context: ./nodejs-app
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./nodejs-app:/usr/src/app
+    environment:
+      - NODE_ENV=development
+      - TS_NODE_PROJECT=/usr/src/app/tsconfig.json
+    depends_on:
+      - db
+    command: sh -c "npm start || sleep infinity"
+
+  db:
+    image: nouchka/sqlite3:latest
+    volumes:
+      - dbdata:/data
+    environment:
+      - SQLITE_DB_FILE=/data/database.sqlite
+
+volumes:
+  dbdata:
