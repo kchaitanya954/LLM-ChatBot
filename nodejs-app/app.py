@@ -27,7 +27,7 @@ class LLMInteraction:
                 config={'max_new_tokens': 100, 'temperature': 0.1}
             )
         else:
-            raise ValueError("Invalid model choice. Please choose '1' for Llama2 or '2' for Mistral.")
+            raise ValueError("Invalid model choice. Please choose llama or mistral.")
         sys.stderr.write("Model loaded successfully.\n")
 
     def get_conversation_history(self, conversation_id):
@@ -54,8 +54,8 @@ class LLMInteraction:
         return self.clean_response(response)
 
     def clean_response(self, response):
-        cleaned = response.split('\n')[0].strip()  # Take only the first line
-        cleaned = cleaned.lstrip('AI:').strip()  # Remove any leading "AI:" if present
+        cleaned = response.split('\n')[0].strip() 
+        cleaned = cleaned.lstrip('AI:').strip()  
         return cleaned
 
     def send_query(self, query, conversation_history):
@@ -81,7 +81,6 @@ class LLMInteraction:
 
             return json.dumps({
                 "response": response,
-                # "conversation_history": updated_history
             })
 
         except json.JSONDecodeError:
@@ -102,4 +101,4 @@ if __name__ == "__main__":
         print(json.dumps({"error": "Invalid JSON input"}))
         sys.exit(1)
     result = llm_interaction.process_json_input(json_input)
-    print(result)  # Ensure the result is printed to standard output
+    print(result)  

@@ -4,8 +4,6 @@ import express, { Request, Response } from 'express';
 import { spawn } from 'child_process';
 import sqlite3 from 'sqlite3';
 import { open, Database } from 'sqlite';
-// import { exec } from 'child_process';
-
 
 const app = express();
 const port = 3000;
@@ -18,23 +16,6 @@ const dbPromise = open({
   driver: sqlite3.Database
 });
 
-// function getPythonPath(): Promise<string> {
-//   return new Promise((resolve, reject) => {
-//     exec('which python3 || which python', (error, stdout, stderr) => {
-//       if (error) {
-//         console.error(`Error finding Python: ${error.message}`);
-//         reject(error);
-//         return;
-//       }
-//       if (stderr) {
-//         console.error(`Error finding Python: ${stderr}`);
-//         reject(new Error(stderr));
-//         return;
-//       }
-//       resolve(stdout.trim());
-//     });
-//   });
-// }
 
 // Initialize database
 async function initDb() {
@@ -62,12 +43,9 @@ app.post('/query', async (req: Request, res: Response) => {
   }
   let db: Database | null = null;
   try {
-    // const scriptPath = path.join(__dirname, 'app.py');  // Adjust this path to where your Python script is located
-    // const pythonPath = await getPythonPath();
-    const pythonPath = 'python3'; // Adjust the path as needed
-    const scriptPath = '/usr/src/app/app.py'; // Adjust this path to where your Python script is located
+    const pythonPath = 'python3'; 
+    const scriptPath = 'app.py'; 
     
-    console.log(`Using Python path: ${pythonPath}`);
     const pythonProcess = spawn(pythonPath, [scriptPath]);
     
     let outputData = '';
@@ -96,7 +74,7 @@ app.post('/query', async (req: Request, res: Response) => {
         // Start a transaction
         await db.run('BEGIN TRANSACTION');
 
-        // Insert the human message
+        // Insert the conversation
         await db.run('INSERT INTO messages (conversation_id, user_content, ai_content) VALUES (?, ?, ?)', [conversation_id, query, result.response]);
 
         // Commit the transaction

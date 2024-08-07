@@ -1,7 +1,7 @@
 # Use a more recent Node.js image
 FROM node:20-slim
 
-# Install Python
+# Install Python and required libraries
 RUN apt-get update && apt-get install -y python3.10 python3-pip && \
     apt-get install -y wget ca-certificates && \
     rm -rf /var/lib/apt/lists/*
@@ -25,6 +25,7 @@ RUN mkdir -p models
 RUN wget -O models/llama-2-7b-chat.ggmlv3.q2_K.bin "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGML/resolve/main/llama-2-7b-chat.ggmlv3.q2_K.bin?download=true"
 RUN wget -O models/mistral-7b-instruct-v0.2-code-ft.Q2_K.gguf "https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-code-ft-GGUF/resolve/main/mistral-7b-instruct-v0.2-code-ft.Q2_K.gguf?download=true"
 
+# Install Python dependencies
 RUN pip install -r requirements.txt --break-system-packages
 
 # Install TypeScript and ts-node globally
@@ -36,5 +37,5 @@ RUN npm run build
 # Expose the port your Node.js app will run on
 EXPOSE 3000
 
-# Command to run the Node.js server
+# Run the Node.js server
 CMD ["npm", "start"]
