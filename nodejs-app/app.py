@@ -9,11 +9,14 @@ class LLMInteraction:
     def __init__(self, db_path='database.sqlite'):
         self.model = None
         self.db_path = db_path
-
+    # COnnection to sqlite3 database
     def connect_db(self):
         return sqlite3.connect(self.db_path)
 
     def select_model(self, model_choice):
+        '''
+        Function to select the model. Only llama and mistral are the available options.
+        '''
         if model_choice == "llama":
             self.model = CTransformers(
                 model='models/llama-2-7b-chat.ggmlv3.q2_K.bin',
@@ -30,16 +33,23 @@ class LLMInteraction:
             raise ValueError("Invalid model choice. Please choose llama or mistral.")
         sys.stderr.write("Model loaded successfully.\n")
 
+    
     def get_conversation_history(self, conversation_id):
+        '''
+        Function to get the last 5 conversations from the sql server based on conversation_id
+        '''
         with self.connect_db() as conn:
             cursor = conn.cursor()
-            cursor.execute('SELECT conversation_id, user_content, ai_content FROM messages WHERE conversation_id = ? ORDER BY timestamp', (conversation_id,))
+            cursor.execute('SELECT conversation_id, user_content, ai_content FROM messages WHERE conversation_id = ? ORDER BY timestamp LIMIT 5', (conversation_id,))
             rows = cursor.fetchall()
         history = [{"human": row[1], "ai": row[2]} for row in rows]
         return history
 
     def get_llm_response(self, input_text, conversation_history):
-        context = "\n".join([f"Human: {msg['human']}\nAI: {msg['ai']}" for msg in conversation_history[-5:]])  # Limited to last 5 interactions
+        '''
+        sending prompt message to the LLM model and fetching the response.
+        '''
+        context = "\n".join([f"Human: {msg['human']}\nAI: {msg['ai']}" for msg in conversation_history])
         template = f"""
         You are a helpful AI assistant. Your task is to respond directly and concisely to the human's current question, using the conversation history for context if necessary. Do not generate any follow-up questions, additional dialogue, or content beyond answering the current question.
 
@@ -54,6 +64,9 @@ class LLMInteraction:
         return self.clean_response(response)
 
     def clean_response(self, response):
+        '''
+        Clean the output response from the model
+        '''
         cleaned = response.split('\n')[0].strip() 
         cleaned = cleaned.lstrip('AI:').strip()  
         return cleaned
